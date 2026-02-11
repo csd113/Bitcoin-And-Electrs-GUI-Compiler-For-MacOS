@@ -594,22 +594,23 @@ def compile_bitcoin_source(version, build_dir, cores):
         if use_cmake(version):
             log(f"\n🔨 Building with CMake (Bitcoin Core {version})...\n")
             build_subdir = os.path.join(src_dir, "build")
-            os.makedirs(build_subdir, exist_ok=True)
             
             # Configure with CMake - disable wallet support since we're only building a node
+            # Use -B to specify build directory (modern CMake syntax)
             cmake_opts = [
-                "-DBUILD_WALLET=OFF",  # Disable wallet (no Berkeley DB needed)
-                "-DBUILD_GUI=OFF",     # Disable GUI
+                "-DENABLE_WALLET=OFF",  # Disable wallet (no Berkeley DB or SQLite needed)
+                "-DBUILD_GUI=OFF",       # Disable GUI
             ]
             
-            cmake_cmd = f"cmake .. {' '.join(cmake_opts)}"
+            cmake_cmd = f"cmake -B build {' '.join(cmake_opts)}"
             log(f"\n⚙️  Configuring (wallet support disabled for node-only build)...\n")
-            run_command(cmake_cmd, cwd=build_subdir, env=env)
+            run_command(cmake_cmd, cwd=src_dir, env=env)
             
             log(f"\n🔧 Compiling with {cores} cores...\n")
-            run_command(f"make -j{cores}", cwd=build_subdir, env=env)
+            run_command(f"cmake --build build -j{cores}", cwd=src_dir, env=env)
             
             # Binary locations for CMake build
+            build_subdir = os.path.join(src_dir, "build")
             binary_dir = os.path.join(build_subdir, "src")
             binaries = [
                 os.path.join(binary_dir, "bitcoind"),
