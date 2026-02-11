@@ -80,7 +80,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='Bitcoin Compiler.app',
-    icon=None,  # Add your .icns file path here if you have one
+    icon='image.icns',  # Add your .icns file path here if you have one
     bundle_identifier='com.bitcointools.compiler',
     version='1.0.0',
     info_plist={
