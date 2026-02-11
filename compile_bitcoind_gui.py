@@ -227,29 +227,8 @@ def setup_build_environment():
             env["DYLD_LIBRARY_PATH"] = f"{llvm_prefix}/lib"
             break
     
-    # Berkeley DB for Bitcoin
-    bdb_paths = [
-        f"{BREW_PREFIX}/opt/berkeley-db@4" if BREW_PREFIX else None,
-        "/opt/homebrew/opt/berkeley-db@4",
-        "/usr/local/opt/berkeley-db@4"
-    ]
-    for bdb_prefix in bdb_paths:
-        if bdb_prefix and os.path.isdir(bdb_prefix):
-            env["BDB_PREFIX"] = bdb_prefix
-            break
-    
-    # OpenSSL
-    openssl_paths = [
-        f"{BREW_PREFIX}/opt/openssl" if BREW_PREFIX else None,
-        "/opt/homebrew/opt/openssl",
-        "/usr/local/opt/openssl"
-    ]
-    for openssl_prefix in openssl_paths:
-        if openssl_prefix and os.path.isdir(openssl_prefix):
-            env["OPENSSL_ROOT_DIR"] = openssl_prefix
-            existing_pkg_config = env.get('PKG_CONFIG_PATH', '')
-            env["PKG_CONFIG_PATH"] = f"{openssl_prefix}/lib/pkgconfig:{existing_pkg_config}"
-            break
+    # Note: Berkeley DB is NOT configured here as it's only needed for legacy wallet support
+    # For running a Bitcoin node (bitcoind), wallet support is disabled in the build
     
     return env
 
@@ -405,10 +384,10 @@ def check_dependencies():
             log(f"  Homebrew prefix: {BREW_PREFIX}\n")
 
             # Required Homebrew packages (excluding rust, we check that separately)
+            # Note: berkeley-db@4 is only needed for wallet support, not for running a node
             brew_packages = [
                 "automake", "libtool", "pkg-config", "boost",
-                "berkeley-db@4", "openssl", "miniupnpc",
-                "zeromq", "sqlite", "python", "cmake", "llvm"
+                "miniupnpc", "zeromq", "sqlite", "python", "cmake", "llvm"
             ]
 
             log("\nChecking Homebrew packages...\n")
@@ -586,10 +565,7 @@ def compile_bitcoin_source(version, build_dir, cores):
         
         log(f"\nEnvironment setup:\n")
         log(f"  PATH: {env['PATH'][:150]}...\n")
-        if 'BDB_PREFIX' in env:
-            log(f"  BDB_PREFIX: {env['BDB_PREFIX']}\n")
-        if 'OPENSSL_ROOT_DIR' in env:
-            log(f"  OPENSSL_ROOT_DIR: {env['OPENSSL_ROOT_DIR']}\n")
+        log(f"  Building node-only (wallet support disabled)\n")
         
         # Determine build method
         if use_cmake(version):
@@ -597,15 +573,14 @@ def compile_bitcoin_source(version, build_dir, cores):
             build_subdir = os.path.join(src_dir, "build")
             os.makedirs(build_subdir, exist_ok=True)
             
-            # Configure with CMake
-            cmake_opts = []
-            if "BDB_PREFIX" in env:
-                cmake_opts.append(f"-DBDB_PREFIX={env['BDB_PREFIX']}")
-            if "OPENSSL_ROOT_DIR" in env:
-                cmake_opts.append(f"-DOPENSSL_ROOT_DIR={env['OPENSSL_ROOT_DIR']}")
+            # Configure with CMake - disable wallet support since we're only building a node
+            cmake_opts = [
+                "-DBUILD_WALLET=OFF",  # Disable wallet (no Berkeley DB needed)
+                "-DBUILD_GUI=OFF",     # Disable GUI
+            ]
             
             cmake_cmd = f"cmake .. {' '.join(cmake_opts)}"
-            log(f"\n⚙️  Configuring...\n")
+            log(f"\n⚙️  Configuring (wallet support disabled for node-only build)...\n")
             run_command(cmake_cmd, cwd=build_subdir, env=env)
             
             log(f"\n🔧 Compiling with {cores} cores...\n")
@@ -624,18 +599,18 @@ def compile_bitcoin_source(version, build_dir, cores):
         else:
             log(f"\n🔨 Building with Autotools (Bitcoin Core {version})...\n")
             
-            # Configure options
-            config_opts = []
-            if "BDB_PREFIX" in env:
-                config_opts.append(f"BDB_LIBS=\"-L{env['BDB_PREFIX']}/lib -ldb_cxx-4.8\"")
-                config_opts.append(f"BDB_CFLAGS=\"-I{env['BDB_PREFIX']}/include\"")
+            # Configure options - disable wallet support for node-only build
+            config_opts = [
+                "--disable-wallet",  # Disable wallet (no Berkeley DB needed)
+                "--disable-gui",     # Disable GUI
+            ]
             
             config_cmd = f"./configure {' '.join(config_opts)}"
             
             log(f"\n⚙️  Running autogen.sh...\n")
             run_command("./autogen.sh", cwd=src_dir, env=env)
             
-            log(f"\n⚙️  Configuring...\n")
+            log(f"\n⚙️  Configuring (wallet support disabled for node-only build)...\n")
             run_command(config_cmd, cwd=src_dir, env=env)
             
             log(f"\n🔧 Compiling with {cores} cores...\n")
