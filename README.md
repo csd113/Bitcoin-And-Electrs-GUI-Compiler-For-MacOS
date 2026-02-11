@@ -10,11 +10,12 @@ python based app that checks dependancies and is able to auto compile both bitco
    build_app.sh
 
 ### 2. Run the build script
-chmod +x build_app.sh
-./build_app.sh
-
-### 3. Done! App is in dist/ folder
 ```
+chmod +x build_app.sh
+
+./build_app.sh
+```
+Done! App is in dist/ folder
 
 The build script will:
 - ✅ Check if PyInstaller is installed
@@ -24,9 +25,7 @@ The build script will:
 - ✅ Test launch it
 - ✅ Show next steps
 
-## 📋 What You Need
-
-### Required:
+### Build Requirements:
 - macOS 10.13 or later
 - Python 3.8 or later
 - pip (Python package manager)
@@ -34,17 +33,9 @@ The build script will:
 ### Will be installed automatically:
 - PyInstaller
 
-## 🎯 Two Ways to Build
-
-### Method 1: Use Build Script (EASIEST)
-
-```bash
-./build_app.sh
-```
-
 ### Method 2: Manual with Spec File
 
-```bash
+```
 # Install PyInstaller if needed
 pip3 install pyinstaller
 
@@ -54,7 +45,7 @@ pyinstaller bitcoin_compiler.spec
 
 ### Method 3: Manual Command Line
 
-```bash
+```
 pyinstaller \
     --name "Bitcoin Compiler" \
     --windowed \
