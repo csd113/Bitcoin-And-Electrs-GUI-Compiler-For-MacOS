@@ -69,12 +69,11 @@ The app can automatically install the following via Homebrew:
 1. **Clone the repository:**
    ```
    git clone https://github.com/csd113/bitcoin-and-electrs-compiler-macos.git
-   cd bitcoin-electrs-compiler
+   cd bitcoin-and-electrs-compiler-macos
    ```
 
-# How to install:
- 1. Make sure you have the files
-### Should see:
+###1. Make sure you have the files
+Should see:
    - compile_bitcoind_gui.py
      
    - bitcoin_compiler.spec
@@ -123,12 +122,12 @@ pyinstaller \
 1. **Clone the repository:**
    ```
    git clone https://github.com/csd113/bitcoin-and-electrs-compiler-macos.git
-   cd bitcoin-electrs-compiler
+   cd bitcoin-and-electrs-compiler-macos
    ```
 
 2. **Run the application:**
    ```bash
-   python3 compile_bitcoind_gui_fixed.py
+   python3 compile_bitcoind_gui.py
    ```
 
 ## 📖 Usage
