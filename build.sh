@@ -2,8 +2,8 @@
 
 set -e
 
-APP_NAME="Bitcoin Electrs Compiler"
-SPEC_FILE="BitcoinElectrsCompiler.spec"
+APP_NAME="BitForge"
+SPEC_FILE="BitForge.spec"
 DIST_DIR="dist"
 BUILD_DIR="build"
 
